@@ -1,0 +1,175 @@
+﻿.trends-container {
+  padding: 20px;
+}
+
+.trends-header {
+  margin-bottom: 30px;
+}
+
+.trends-header h1 {
+  color: #ff4500;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.trends-header p {
+  color: #888;
+  font-size: 1.1rem;
+}
+
+.trends-filters {
+  margin-bottom: 30px;
+}
+
+.search-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-form input {
+  flex: 1;
+  padding: 12px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 5px;
+  color: #e0e0e0;
+  font-size: 1rem;
+}
+
+.search-form input:focus {
+  outline: none;
+  border-color: #ff4500;
+}
+
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.category-btn {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #e0e0e0;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: capitalize;
+}
+
+.category-btn:hover {
+  border-color: #ff4500;
+  color: #ff4500;
+}
+
+.category-btn.active {
+  background: #ff4500;
+  border-color: #ff4500;
+  color: white;
+}
+
+.trends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.trend-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.trend-card:hover {
+  border-color: #ff4500;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(255, 69, 0, 0.2);
+}
+
+.trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 15px;
+}
+
+.trend-header h3 {
+  color: #e0e0e0;
+  font-size: 1.3rem;
+  flex: 1;
+}
+
+.trend-score {
+  background: linear-gradient(135deg, #8b0000, #ff4500);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.trend-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trend-category {
+  background: #2d0000;
+  color: #ff6347;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  display: inline-block;
+  width: fit-content;
+  text-transform: capitalize;
+}
+
+.trend-popularity {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.trend-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.keyword-tag {
+  background: #0a0a0a;
+  border: 1px solid #333;
+  color: #ff4500;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 0.85rem;
+}
+
+.trend-source {
+  color: #666;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: 5px;
+}
+
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+}
+
+.no-results p {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .trends-grid {
+    grid-template-columns: 1fr;
+  }
+}
