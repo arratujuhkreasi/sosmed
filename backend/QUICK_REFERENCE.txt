@@ -1,0 +1,47 @@
+﻿╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║     HORROR CONTENT API - QUICK REFERENCE                  ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+
+📍 PRODUCTION URL
+https://backend-sigma-fawn-15.vercel.app
+
+📊 VERCEL DASHBOARD
+https://vercel.com/arratujuhkreasis-projects/backend
+
+🗄️ DATABASE
+Turso (LibSQL) - AWS Tokyo
+libsql://smm-arratujuhkreasi.aws-ap-northeast-1.turso.io
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔓 PUBLIC ENDPOINTS
+
+POST /api/auth/register    Register new user
+POST /api/auth/login       Login user
+GET  /api/trends           Get trending topics
+GET  /api/trends/search    Search trends
+
+🔒 PROTECTED ENDPOINTS (require JWT token)
+
+GET    /api/auth/profile         Get user profile
+PUT    /api/auth/profile         Update profile
+GET    /api/content              List contents
+POST   /api/content              Create content
+GET    /api/content/:id          Get content
+PUT    /api/content/:id          Update content
+DELETE /api/content/:id          Delete content
+POST   /api/performa             Create performance
+GET    /api/performa/content/:id Get performance
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧪 QUICK TEST
+
+curl https://backend-sigma-fawn-15.vercel.app/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ STATUS: LIVE AND OPERATIONAL
+
