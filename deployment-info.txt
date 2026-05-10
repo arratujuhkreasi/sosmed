@@ -1,0 +1,39 @@
+﻿HORROR CONTENT APP - DEPLOYMENT INFORMATION
+============================================
+
+Deployment Date: 2026-05-10 08:14:05
+
+MongoDB Atlas:
+<YOUR_MONGODB_URI_HERE>
+
+Backend (Railway):
+<YOUR_BACKEND_URL_HERE>
+
+Frontend (Vercel):
+<WILL_BE_PROVIDED_BY_VERCEL>
+
+JWT Secret:
+lLBypr0q9SN1eGK8YTUIFmJwtcRvnkxQ
+
+Environment Variables for Backend:
+-----------------------------------
+NODE_ENV=production
+PORT=5000
+MONGO_URI=<YOUR_MONGODB_URI_HERE>
+JWT_SECRET=lLBypr0q9SN1eGK8YTUIFmJwtcRvnkxQ
+JWT_EXPIRE=30d
+
+Environment Variables for Frontend:
+------------------------------------
+REACT_APP_API_URL=<YOUR_BACKEND_URL_HERE>/api
+
+Sample Login Credentials (after seeding):
+------------------------------------------
+Admin:
+  Email: admin@horrorapp.com
+  Password: admin123
+
+Creator:
+  Email: john@example.com
+  Password: password123
+
