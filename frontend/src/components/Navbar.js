@@ -31,6 +31,12 @@ const Navbar = () => {
                 <Link to="/content">My Content</Link>
               </li>
               <li>
+                <Link to="/hooks">Hook Generator</Link>
+              </li>
+              <li>
+                <Link to="/niche-finder">Niche Finder</Link>
+              </li>
+              <li>
                 <Link to="/profile">Profile</Link>
               </li>
               <li>

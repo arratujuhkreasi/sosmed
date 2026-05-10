@@ -12,6 +12,10 @@ import Dashboard from './pages/Dashboard';
 import Trends from './pages/Trends';
 import ContentList from './pages/ContentList';
 import ContentForm from './pages/ContentForm';
+import ContentDetail from './pages/ContentDetail';
+import Profile from './pages/Profile';
+import HookGenerator from './pages/HookGenerator';
+import NicheFinder from './pages/NicheFinder';
 import './styles/App.css';
 
 function App() {
@@ -54,6 +58,38 @@ function App() {
                 element={
                   <PrivateRoute>
                     <ContentForm />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/content/:id"
+                element={
+                  <PrivateRoute>
+                    <ContentDetail />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/hooks"
+                element={
+                  <PrivateRoute>
+                    <HookGenerator />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/niche-finder"
+                element={
+                  <PrivateRoute>
+                    <NicheFinder />
                   </PrivateRoute>
                 }
               />
