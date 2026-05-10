@@ -1,19 +1,28 @@
-﻿const Trend = require('../models/Trend');
+﻿const { trendHelpers } = require('../db/helpers');
+const { db } = require('../db');
+const { trends } = require('../db/schema');
+const { eq, or, like, desc } = require('drizzle-orm');
 
 const getTrends = async (req, res) => {
   try {
     const { category, limit = 10 } = req.query;
 
-    const query = { isActive: true };
+    let query = db.select().from(trends).where(eq(trends.isActive, true));
+    
     if (category) {
-      query.category = category;
+      query = query.where(eq(trends.category, category));
     }
 
-    const trends = await Trend.find(query)
-      .sort({ trendingScore: -1, popularity: -1 })
+    const result = await query
+      .orderBy(desc(trends.trendingScore), desc(trends.popularity))
       .limit(parseInt(limit));
 
-    res.json(trends);
+    const trendsWithParsedKeywords = result.map(t => ({
+      ...t,
+      keywords: JSON.parse(t.keywords),
+    }));
+
+    res.json(trendsWithParsedKeywords);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -21,7 +30,7 @@ const getTrends = async (req, res) => {
 
 const getTrendById = async (req, res) => {
   try {
-    const trend = await Trend.findById(req.params.id);
+    const trend = await trendHelpers.findById(req.params.id);
 
     if (trend) {
       res.json(trend);
@@ -37,7 +46,7 @@ const createTrend = async (req, res) => {
   try {
     const { topic, category, keywords, popularity, trendingScore, source } = req.body;
 
-    const trend = await Trend.create({
+    const trend = await trendHelpers.create({
       topic,
       category,
       keywords,
@@ -54,18 +63,20 @@ const createTrend = async (req, res) => {
 
 const updateTrend = async (req, res) => {
   try {
-    const trend = await Trend.findById(req.params.id);
+    const trend = await trendHelpers.findById(req.params.id);
 
     if (trend) {
-      trend.topic = req.body.topic || trend.topic;
-      trend.category = req.body.category || trend.category;
-      trend.keywords = req.body.keywords || trend.keywords;
-      trend.popularity = req.body.popularity || trend.popularity;
-      trend.trendingScore = req.body.trendingScore || trend.trendingScore;
-      trend.source = req.body.source || trend.source;
-      trend.isActive = req.body.isActive !== undefined ? req.body.isActive : trend.isActive;
+      const updateData = {
+        topic: req.body.topic || trend.topic,
+        category: req.body.category || trend.category,
+        keywords: req.body.keywords || trend.keywords,
+        popularity: req.body.popularity !== undefined ? req.body.popularity : trend.popularity,
+        trendingScore: req.body.trendingScore !== undefined ? req.body.trendingScore : trend.trendingScore,
+        source: req.body.source || trend.source,
+        isActive: req.body.isActive !== undefined ? req.body.isActive : trend.isActive,
+      };
 
-      const updatedTrend = await trend.save();
+      const updatedTrend = await trendHelpers.update(req.params.id, updateData);
       res.json(updatedTrend);
     } else {
       res.status(404).json({ message: 'Trend not found' });
@@ -77,10 +88,10 @@ const updateTrend = async (req, res) => {
 
 const deleteTrend = async (req, res) => {
   try {
-    const trend = await Trend.findById(req.params.id);
+    const trend = await trendHelpers.findById(req.params.id);
 
     if (trend) {
-      await trend.deleteOne();
+      await db.delete(trends).where(eq(trends.id, req.params.id));
       res.json({ message: 'Trend removed' });
     } else {
       res.status(404).json({ message: 'Trend not found' });
@@ -98,15 +109,22 @@ const searchTrends = async (req, res) => {
       return res.status(400).json({ message: 'Keyword is required' });
     }
 
-    const trends = await Trend.find({
-      $or: [
-        { topic: { $regex: keyword, $options: 'i' } },
-        { keywords: { $in: [new RegExp(keyword, 'i')] } },
-      ],
-      isActive: true,
-    }).sort({ trendingScore: -1 });
+    // SQLite LIKE search
+    const result = await db.select().from(trends)
+      .where(
+        or(
+          like(trends.topic, `%${keyword}%`),
+          like(trends.keywords, `%${keyword}%`)
+        )
+      )
+      .orderBy(desc(trends.trendingScore));
 
-    res.json(trends);
+    const trendsWithParsedKeywords = result.map(t => ({
+      ...t,
+      keywords: JSON.parse(t.keywords),
+    }));
+
+    res.json(trendsWithParsedKeywords);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

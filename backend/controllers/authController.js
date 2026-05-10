@@ -1,17 +1,17 @@
-﻿const User = require('../models/User');
+﻿const { userHelpers } = require('../db/helpers');
 const generateToken = require('../utils/generateToken');
 
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role, channelName } = req.body;
 
-    const userExists = await User.findOne({ email });
+    const userExists = await userHelpers.findByEmail(email);
 
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const user = await User.create({
+    const user = await userHelpers.create({
       name,
       email,
       password,
@@ -21,12 +21,12 @@ const registerUser = async (req, res) => {
 
     if (user) {
       res.status(201).json({
-        _id: user._id,
+        _id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
         channelName: user.channelName,
-        token: generateToken(user._id),
+        token: generateToken(user.id),
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -40,16 +40,16 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await userHelpers.findByEmail(email);
 
-    if (user && (await user.matchPassword(password))) {
+    if (user && (await userHelpers.comparePassword(password, user.password))) {
       res.json({
-        _id: user._id,
+        _id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
         channelName: user.channelName,
-        token: generateToken(user._id),
+        token: generateToken(user.id),
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
@@ -61,11 +61,11 @@ const loginUser = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await userHelpers.findById(req.user._id);
 
     if (user) {
       res.json({
-        _id: user._id,
+        _id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -81,26 +81,30 @@ const getUserProfile = async (req, res) => {
 
 const updateUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await userHelpers.findById(req.user._id);
 
     if (user) {
-      user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;
-      user.channelName = req.body.channelName || user.channelName;
+      const updateData = {
+        name: req.body.name || user.name,
+        email: req.body.email || user.email,
+        channelName: req.body.channelName || user.channelName,
+      };
 
       if (req.body.password) {
-        user.password = req.body.password;
+        const bcrypt = require('bcryptjs');
+        const salt = await bcrypt.genSalt(10);
+        updateData.password = await bcrypt.hash(req.body.password, salt);
       }
 
-      const updatedUser = await user.save();
+      const updatedUser = await userHelpers.update(user.id, updateData);
 
       res.json({
-        _id: updatedUser._id,
+        _id: updatedUser.id,
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
         channelName: updatedUser.channelName,
-        token: generateToken(updatedUser._id),
+        token: generateToken(updatedUser.id),
       });
     } else {
       res.status(404).json({ message: 'User not found' });

@@ -1,0 +1,12 @@
+﻿# Environment Variables for Vercel
+# Copy these values to your Vercel project settings
+
+TURSO_DATABASE_URL=libsql://smm-arratujuhkreasi.aws-ap-northeast-1.turso.io
+
+TURSO_AUTH_TOKEN=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzgzNzY2ODksImlkIjoiMDE5ZTBmODItOWQwMS03YzA5LWI0MmUtMGUxYWQ3ZWEzMTFmIiwicmlkIjoiYmZhNDA0ZWYtZDNhOC00ZWJlLTkzZWQtZDc1ZmZiZWYwZTgzIn0.MUJH49goe3tlMOmbdx0epNoGxH8alsT9bzOtzD-0YajmvPLxzGL3_V7Dm6EvtPJ3mlbM-U5jSoYGLTWPDqbmBg
+
+JWT_SECRET=your_production_jwt_secret_change_this_to_random_string
+
+JWT_EXPIRE=30d
+
+NODE_ENV=production

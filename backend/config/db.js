@@ -1,12 +1,10 @@
-﻿const mongoose = require('mongoose');
+﻿const { client } = require('../db');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    // Test connection
+    await client.execute('SELECT 1');
+    console.log('Turso Database Connected');
   } catch (error) {
     console.error(`Error: ${error.message}`);
     process.exit(1);

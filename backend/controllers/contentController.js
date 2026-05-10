@@ -1,12 +1,11 @@
-﻿const Content = require('../models/Content');
-const Performa = require('../models/Performa');
+﻿const { contentHelpers, performaHelpers, userHelpers } = require('../db/helpers');
 
 const createContent = async (req, res) => {
   try {
     const { judul, deskripsi, tag, niche, hook, duration } = req.body;
 
-    const content = await Content.create({
-      user: req.user._id,
+    const content = await contentHelpers.create({
+      userId: req.user._id,
       judul,
       deskripsi,
       tag,
@@ -23,11 +22,20 @@ const createContent = async (req, res) => {
 
 const getContents = async (req, res) => {
   try {
-    const contents = await Content.find({ user: req.user._id })
-      .populate('user', 'name email')
-      .sort({ createdAt: -1 });
+    const contents = await contentHelpers.findByUserId(req.user._id);
 
-    res.json(contents);
+    // Populate user data
+    const contentsWithUser = await Promise.all(
+      contents.map(async (content) => {
+        const user = await userHelpers.findById(content.userId);
+        return {
+          ...content,
+          user: user ? { name: user.name, email: user.email } : null,
+        };
+      })
+    );
+
+    res.json(contentsWithUser);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -35,10 +43,14 @@ const getContents = async (req, res) => {
 
 const getContentById = async (req, res) => {
   try {
-    const content = await Content.findById(req.params.id).populate('user', 'name email');
+    const content = await contentHelpers.findById(req.params.id);
 
     if (content) {
-      res.json(content);
+      const user = await userHelpers.findById(content.userId);
+      res.json({
+        ...content,
+        user: user ? { name: user.name, email: user.email } : null,
+      });
     } else {
       res.status(404).json({ message: 'Content not found' });
     }
@@ -49,22 +61,24 @@ const getContentById = async (req, res) => {
 
 const updateContent = async (req, res) => {
   try {
-    const content = await Content.findById(req.params.id);
+    const content = await contentHelpers.findById(req.params.id);
 
     if (content) {
-      if (content.user.toString() !== req.user._id.toString()) {
+      if (content.userId !== req.user._id) {
         return res.status(401).json({ message: 'Not authorized' });
       }
 
-      content.judul = req.body.judul || content.judul;
-      content.deskripsi = req.body.deskripsi || content.deskripsi;
-      content.tag = req.body.tag || content.tag;
-      content.niche = req.body.niche || content.niche;
-      content.hook = req.body.hook || content.hook;
-      content.duration = req.body.duration || content.duration;
-      content.status = req.body.status || content.status;
+      const updateData = {
+        judul: req.body.judul || content.judul,
+        deskripsi: req.body.deskripsi || content.deskripsi,
+        tag: req.body.tag || content.tag,
+        niche: req.body.niche || content.niche,
+        hook: req.body.hook || content.hook,
+        duration: req.body.duration || content.duration,
+        status: req.body.status || content.status,
+      };
 
-      const updatedContent = await content.save();
+      const updatedContent = await contentHelpers.update(req.params.id, updateData);
       res.json(updatedContent);
     } else {
       res.status(404).json({ message: 'Content not found' });
@@ -76,14 +90,14 @@ const updateContent = async (req, res) => {
 
 const deleteContent = async (req, res) => {
   try {
-    const content = await Content.findById(req.params.id);
+    const content = await contentHelpers.findById(req.params.id);
 
     if (content) {
-      if (content.user.toString() !== req.user._id.toString()) {
+      if (content.userId !== req.user._id) {
         return res.status(401).json({ message: 'Not authorized' });
       }
 
-      await content.deleteOne();
+      await contentHelpers.delete(req.params.id);
       res.json({ message: 'Content removed' });
     } else {
       res.status(404).json({ message: 'Content not found' });
@@ -95,11 +109,20 @@ const deleteContent = async (req, res) => {
 
 const getContentPerformance = async (req, res) => {
   try {
-    const performance = await Performa.find({ content: req.params.id })
-      .populate('content', 'judul')
-      .sort({ recordedAt: -1 });
+    const performance = await performaHelpers.findByContentId(req.params.id);
 
-    res.json(performance);
+    // Populate content data
+    const performanceWithContent = await Promise.all(
+      performance.map(async (perf) => {
+        const content = await contentHelpers.findById(perf.contentId);
+        return {
+          ...perf,
+          content: content ? { judul: content.judul } : null,
+        };
+      })
+    );
+
+    res.json(performanceWithContent);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

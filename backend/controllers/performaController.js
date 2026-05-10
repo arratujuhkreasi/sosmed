@@ -1,22 +1,21 @@
-﻿const Performa = require('../models/Performa');
-const Content = require('../models/Content');
+﻿const { performaHelpers, contentHelpers } = require('../db/helpers');
 
 const createPerformance = async (req, res) => {
   try {
     const { contentId, views, likes, comments, shares, watchTime } = req.body;
 
-    const content = await Content.findById(contentId);
+    const content = await contentHelpers.findById(contentId);
 
     if (!content) {
       return res.status(404).json({ message: 'Content not found' });
     }
 
-    if (content.user.toString() !== req.user._id.toString()) {
+    if (content.userId !== req.user._id) {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    const performa = await Performa.create({
-      content: contentId,
+    const performa = await performaHelpers.create({
+      contentId,
       views,
       likes,
       comments,
@@ -32,11 +31,20 @@ const createPerformance = async (req, res) => {
 
 const getPerformanceByContent = async (req, res) => {
   try {
-    const performance = await Performa.find({ content: req.params.contentId })
-      .populate('content', 'judul')
-      .sort({ recordedAt: -1 });
+    const performance = await performaHelpers.findByContentId(req.params.contentId);
 
-    res.json(performance);
+    // Populate content data
+    const performanceWithContent = await Promise.all(
+      performance.map(async (perf) => {
+        const content = await contentHelpers.findById(perf.contentId);
+        return {
+          ...perf,
+          content: content ? { judul: content.judul } : null,
+        };
+      })
+    );
+
+    res.json(performanceWithContent);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -46,11 +54,14 @@ const getPerformanceAnalytics = async (req, res) => {
   try {
     const contentId = req.params.contentId;
 
-    const performances = await Performa.find({ content: contentId }).sort({ recordedAt: 1 });
+    const performances = await performaHelpers.findByContentId(contentId);
 
     if (performances.length === 0) {
       return res.status(404).json({ message: 'No performance data found' });
     }
+
+    // Sort by recordedAt ascending
+    performances.sort((a, b) => new Date(a.recordedAt) - new Date(b.recordedAt));
 
     const latest = performances[performances.length - 1];
     const totalViews = performances.reduce((sum, p) => sum + p.views, 0);
@@ -72,23 +83,27 @@ const getPerformanceAnalytics = async (req, res) => {
 
 const updatePerformance = async (req, res) => {
   try {
-    const performa = await Performa.findById(req.params.id).populate('content');
+    const performa = await performaHelpers.findById(req.params.id);
 
     if (!performa) {
       return res.status(404).json({ message: 'Performance data not found' });
     }
 
-    if (performa.content.user.toString() !== req.user._id.toString()) {
+    const content = await contentHelpers.findById(performa.contentId);
+
+    if (!content || content.userId !== req.user._id) {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    performa.views = req.body.views || performa.views;
-    performa.likes = req.body.likes || performa.likes;
-    performa.comments = req.body.comments || performa.comments;
-    performa.shares = req.body.shares || performa.shares;
-    performa.watchTime = req.body.watchTime || performa.watchTime;
+    const updateData = {
+      views: req.body.views !== undefined ? req.body.views : performa.views,
+      likes: req.body.likes !== undefined ? req.body.likes : performa.likes,
+      comments: req.body.comments !== undefined ? req.body.comments : performa.comments,
+      shares: req.body.shares !== undefined ? req.body.shares : performa.shares,
+      watchTime: req.body.watchTime !== undefined ? req.body.watchTime : performa.watchTime,
+    };
 
-    const updatedPerforma = await performa.save();
+    const updatedPerforma = await performaHelpers.update(req.params.id, updateData);
     res.json(updatedPerforma);
   } catch (error) {
     res.status(500).json({ message: error.message });
